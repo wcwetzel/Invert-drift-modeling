@@ -2,7 +2,7 @@
 # assumes food density doesn't change
 # Pr(drift) depends on initial food and current density
 library(bbmle)
-# 1st run 'simple drift simulation.R' to generate data
+# 1st run 'simple drift stochastic simulation.R' to generate data
 
 
 E.Nt = function(N0, b, f, t){
