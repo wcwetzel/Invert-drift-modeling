@@ -64,5 +64,5 @@ var(data.sim[,'N'])
 plot(data.sim[,'N'] ~ data.sim[,'f'], ylab='Herbivores remaining', 
 	xlab='Food index')
 
-plot(I(113 - data.sim[,'N']) ~ data.sim[,'f'], ylab='Herbivores remaining', 
+plot(I(113 - data.sim[,'N']) ~ data.sim[,'f'], ylab='Herbivores drifting', 
 	xlab='Food index')
