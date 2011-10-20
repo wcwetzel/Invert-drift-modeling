@@ -31,19 +31,22 @@
 # dN/dt = -mN - aN^2
 # N(t) = m / ((m/N0 + a) * exp(t * m) - a)
 # dV/dt = (2*m + 4 * a * N) * V - m * N - 2 * a * N^2
-# V(t) see odt file!
+# V(t) = (a * N0 - exp(t*m)*(a*N0 + m))^4 * exp(- 2 * t * m) * 
+#	(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) + 10 * exp(2*t*m) * (a*N0 + m)^2) / 
+#		30*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
+
 
 
 # initial number and parameters:
 N0 = 100
 V0 = N0/3 # not sure what V0 should be!
-k = V0 + N0/3
+k = 100 #V0 + N0/3 # no idea what k from model4 should be
 m = 0.2 # emigration rate
 t = seq(0,10, by=0.1) # timesteps
-f = 1
-b = 0.1
-c = 0.1
-a = 0.01
+f = 1 # food abundance, constant
+b = 0 # all models should be identical to model1 when b=0, c=0, a=0
+c = 0
+a = 0
 
 # analytical solutions for N(t) and V(t) for all models:
 Nt1 = N0 * exp(-m * t)
@@ -53,13 +56,13 @@ Vt2 = exp(2*t*(m-b*f)) * (V0 + N0 * (exp(3 * t * (b*f - m)) - 1)/3)
 Nt3 = N0 * exp(-m * t / (c + f))
 Vt3 = exp(2 * m * t / (c + f)) * (V0 + N0 * (exp(-3*m*t/(c + f)) - 1)/3)
 Nt4 = m / ((m/N0 + a) * exp(t * m) - a)
-Vt4 = exp(4 * log(a * N0 - exp(t*m)*(a*N0 + m)) - 2 * t * m) * 
-	(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) - 20 * exp(2*t*m) * (a*N0 + m)^2) / 
-		60*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
+Vt4 = (a * N0 - exp(t*m)*(a*N0 + m))^4 * exp(- 2 * t * m) * 
+	(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) + 10 * exp(2*t*m) * (a*N0 + m)^2) / 
+		30*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
 
 
 
-# plot analytical results
+# plot and compare all analytical results
 par(mfrow=c(1,2))
 plot(Nt1 ~ t, type='l', lty=2) # model1 = black
 points(Nt2 ~ t, type='l', lty=3, col=2) # model2 = red
@@ -109,10 +112,21 @@ model3 = function(t, x, parms) {
 }
 out.model3 = as.data.frame(lsoda(start, times=t, model3, parms))
 
+model4 = function(t, x, parms) {
+	with( as.list( c(parms, x)), {
+		dn.dt = -m*N - a*N^2					# dN/dt
+		dv.dt = (2 * m + 4 * a * N) * V - m*N - 2 * a * N^2# dV/dt
+		res = c(dn.dt, dv.dt)
+		list(res)
+	})
+}
+out.model4 = as.data.frame(lsoda(start, times=t, model4, parms))
+
+
 
 # graphically compare numerical and analytical results
-par(mfrow=c(3,2))
-plot(Nt1 ~ t, type='l', lty=2, col='blue')
+par(mfrow=c(4,2))
+plot(Nt1 ~ t, type='l', lty=2, col='blue', main='Blue = Analytical, Red = Numerical')
 points(out.model1$N ~ t, type='l', lty=4, col='red')
 
 plot(Vt1 ~ t, type='l', lty=2, col='blue')
@@ -129,3 +143,10 @@ points(out.model3$N ~ t, type='l', lty=4, col='red')
 
 plot(Vt3 ~ t, type='l', lty=2, col='blue')
 points(out.model3$V ~ t, type='l', lty=4, col='red')
+
+plot(Nt4 ~ t, type='l', lty=2, col='blue')
+points(out.model4$N ~ t, type='l', lty=4, col='red')
+
+plot(Vt4 ~ t, type='l', lty=2, col='blue', 
+	ylim=c(min(c(Vt4,out.model4$V)), max(c(Vt4,out.model4$V))))
+points(out.model4$V ~ t, type='l', lty=4, col='red')
