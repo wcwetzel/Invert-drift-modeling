@@ -30,7 +30,7 @@
 # model4, analytical solution for N, see odt file for analytical solution of V:
 # dN/dt = -mN - aN^2
 # N(t) = m / ((m/N0 + a) * exp(t * m) - a)
-# dV/dt = (2*m + 4 * a * N) * V - m * N - 2 * a * N^2
+# dV/dt = (2*m + 4 * a * N) * V - m * N - a * N^2
 # V(t) = (a * N0 - exp(t*m)*(a*N0 + m))^4 * exp(- 2 * t * m) * 
 #	(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) + 10 * exp(2*t*m) * (a*N0 + m)^2) / 
 #		30*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
