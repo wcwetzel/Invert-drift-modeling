@@ -2,7 +2,8 @@
 ## 10 sep 2011
 
 # drift is a linear function of N(t) and rational function of initial food f.
-# dN/dt = f(N) = (b/f) * N
+# MODEL 
+# dN/dt = f(N) = (b/f) * N 
 # N(t) = N0 * exp( (b/f) * t)
 
 # parameters:
