@@ -26,14 +26,16 @@ pf = c("m*N")# propensity function, Pr of 1 event in infintesimal time
 	# interval [t, t + dt)
 tf = 100 # time at which to end simulation
 method = "D" # direct method: slow, stable
-simName = "linear drift"
+simName = "model1"
 
 # Now simulate data for a range of initial food densities
 # Run sim 30 times and save N at t = 10
 
-f = sort(rep(1:10, 30))
+flevels = seq(1, 9.5, by=0.5) # experimental levels of food
+nperf = 30 # number of replicates per food
+f = sort(rep(flevels, nperf))
 data.sim1 = data.frame(rep=NA, N=NA, f=NA)
-for(i in 1:300){
+for(i in 1:length(f)){
 	parms = c(m = m, f = f[i])
 	out = ssa(x0, pf, nu, parms, tf, method, simName, verbose=FALSE)
 	index = which(abs(out$data[,1]-10)==min(abs(out$data[,1]-10)))
@@ -41,8 +43,8 @@ for(i in 1:300){
 }
 
 
-# plot(data.sim[,'N'] ~ data.sim[,'f'], ylab='Herbivores remaining', 
-	# xlab='Food index')
+plot(data.sim1[,'N'] ~ data.sim1[,'f'], ylab='Herbivores remaining', 
+	xlab='Food index')
 
 # plot(I(113 - data.sim[,'N']) ~ data.sim[,'f'], ylab='Herbivores drifting', 
 	# xlab='Food index')

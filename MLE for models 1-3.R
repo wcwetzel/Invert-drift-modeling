@@ -65,26 +65,44 @@ nll3 = function(N, m, c, f, N0, V0, t){
 
 
 
-
+# choose a simulated dataset
 data.sim=data.sim3
 
-
+# run MLE
 model1 = mle2(minuslogl = nll1, 
-	start = list(m = -0.15, V0 = 56.9),
+	start = list(m = 0.15, V0 = 56.9),
 	data = list(N0 = 113, t = 10, 
-	f = data.sim[,'f'], N = data.sim[,'N']))
+	f = data.sim[,'f'], N = data.sim[,'N']),
+	method='Nelder-Mead')
 
 model2 = mle2(minuslogl = nll2, 
-	start = list(m = -0.15, b = 0.01, V0 = 56.9),
+	start = list(m = 0.15, b = 0.01, V0 = 56.9),
 	data = list(N0 = 113, t = 10, 
-	f = data.sim[,'f'], N = data.sim[,'N']))
+	f = data.sim[,'f'], N = data.sim[,'N']),
+	method='Nelder-Mead')
 
 model3 = mle2(minuslogl = nll3, 
-	start = list(m = -0.15, c = 0.01, V0 = 56.9),
+	start = list(m = 0.15, c = 0.01, V0 = 56.9),
 	data = list(N0 = 113, t = 10, 
-	f = data.sim[,'f'], N = data.sim[,'N']))
+	f = data.sim[,'f'], N = data.sim[,'N']),
+	method='Nelder-Mead')
+
+AICctab(model1, model2, model3)
 
 
-AICtab(model1, model2, model3)
-BICtab(model1, model2, model3)
+
+# make model predictions
+pfood = seq(1, 9.5, by=0.25)
+p1 = E.Nt1(N0=113, t=10, m=coef(model1)['m'])
+p2 = E.Nt2(N0=113, t=10, m=coef(model2)['m'], 
+	b=coef(model2)['b'], f=pfood)
+p3 = E.Nt3(N0=113, t=10, m=coef(model3)['m'], 
+	c=coef(model3)['c'], f=pfood)
+
+
+# plot data and predictions
+plot(data.sim$N ~ data.sim$f, las=1, ylab='N', xlab='Food')
+abline(h=p1, col='red')
+points(p2 ~ pfood, col='blue', type='l')
+points(p3 ~ pfood, col='orange', type='l')
 

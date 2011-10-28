@@ -24,14 +24,16 @@ pf = c("m*N / (c + f)")# propensity function, Pr of 1 event in infintesimal time
 	# interval [t, t + dt)
 tf = 100 # time at which to end simulation
 method = "D" # direct method: slow, stable
-simName = "drift"
+simName = "model3"
 
 # Now simulate data for a range of initial food densities
 # Run sim 30 times and save N at t = 10
 
-f = sort(rep(1:10, 30))
+flevels = seq(1, 5, by=1) # experimental levels of food
+nperf = 5 # number of replicates per food
+f = sort(rep(flevels, nperf))
 data.sim3 = data.frame(rep=NA, N=NA, f=NA)
-for(i in 1:300){
+for(i in 1:length(f)){
 	parms = c(m = m, c = c, f = f[i])
 	out = ssa(x0, pf, nu, parms, tf, method, simName, verbose=FALSE)
 	index = which(abs(out$data[,1]-10)==min(abs(out$data[,1]-10)))
