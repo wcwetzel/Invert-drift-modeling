@@ -31,6 +31,7 @@
 # dN/dt = -mN - aN^2
 # N(t) = m / ((m/N0 + a) * exp(t * m) - a)
 # dV/dt = (2*m + 4 * a * N) * V - m * N - a * N^2
+# original, incorrect solution:
 # V(t) = (a * N0 - exp(t*m)*(a*N0 + m))^4 * exp(- 2 * t * m) * 
 #	(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) + 10 * exp(2*t*m) * (a*N0 + m)^2) / 
 #		30*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
@@ -46,7 +47,7 @@ t = seq(0,10, by=0.1) # timesteps
 f = 1 # food abundance, constant
 b = 0 # all models should be identical to model1 when b=0, c=0, a=0
 c = 0
-a = 0
+a = 0.01
 
 # analytical solutions for N(t) and V(t) for all models:
 Nt1 = N0 * exp(-m * t)
@@ -56,9 +57,14 @@ Vt2 = exp(2*t*(m-b*f)) * (V0 + N0 * (exp(3 * t * (b*f - m)) - 1)/3)
 Nt3 = N0 * exp(-m * t / (c + f))
 Vt3 = exp(2 * m * t / (c + f)) * (V0 + N0 * (exp(-3*m*t/(c + f)) - 1)/3)
 Nt4 = m / ((m/N0 + a) * exp(t * m) - a)
-Vt4 = (a * N0 - exp(t*m)*(a*N0 + m))^4 * exp(- 2 * t * m) * 
-	(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) + 10 * exp(2*t*m) * (a*N0 + m)^2) / 
-		30*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
+Vt4 = ( ( ( (-(m^2) / a) * (1-4*C*exp(m*t)) ) / (12 * C^2 * m * (C * exp(m*t) -1)^4) ) - 
+	( ( ((2 * m^2) / a) * (1-5*C*exp(m*t)) ) / (20 * C^2 * m * (C * exp(m*t) -1)^5) ) 
+	+ C ) / 
+	( exp(2 * t * m) / ((C * exp(t * m) -1)^4) )
+
+# OLD, WRONG: Vt4 = (a * N0 - exp(t*m)*(a*N0 + m))^4 * exp(- 2 * t * m) * 
+	#(k - m*N0 * (a^2*N0^2 - 5*a*N0*exp(t*m)*(a*N0 + m) + 10 * exp(2*t*m) * (a*N0 + m)^2) / 
+		#30*(a*N0 + m)^2 * (exp(t*m)*(a*N0 + m) - a*N0)^5)
 
 
 
