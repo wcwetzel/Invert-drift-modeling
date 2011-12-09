@@ -39,15 +39,16 @@
 
 
 # initial number and parameters:
-N0 = 100
+N0 = 113
 V0 = N0/3 # not sure what V0 should be!
 k = 100 #V0 + N0/3 # no idea what k from model4 should be
-m = 0.2 # emigration rate
+m = 0.15 # emigration rate
 t = seq(0,10, by=0.1) # timesteps
 f = 1 # food abundance, constant
 b = 0 # all models should be identical to model1 when b=0, c=0, a=0
 c = 0
-a = 0.01
+a = 0
+C = 100
 
 # analytical solutions for N(t) and V(t) for all models:
 Nt1 = N0 * exp(-m * t)
@@ -73,13 +74,13 @@ par(mfrow=c(1,2))
 plot(Nt1 ~ t, type='l', lty=2) # model1 = black
 points(Nt2 ~ t, type='l', lty=3, col=2) # model2 = red
 points(Nt3 ~ t, type='l', lty=4, col=4) # model3 = blue
-points(Nt4 ~ t, type='l', lty=5, col=6) # model4 = purple
+points(Nt4 ~ t, type='l', lty=5, col=6, lwd=5) # model4 = purple
 
 
 plot(Vt1 ~ t, type='l', lty=2) # model1 = black
 points(Vt2 ~ t, type='l', lty=3, col=2) # model2 = red
 points(Vt3 ~ t, type='l', lty=4, col=4) # model3 = blue
-points(Vt4 ~ t, type='l', lty=5, col=6) # model4 = purple
+points(Vt4 ~ t, type='l', lty=5, col=6, lwd=5) # model4 = purple
 
 
 # Numerically simulate ODEs to test analytical solutions:
@@ -121,7 +122,7 @@ out.model3 = as.data.frame(lsoda(start, times=t, model3, parms))
 model4 = function(t, x, parms) {
 	with( as.list( c(parms, x)), {
 		dn.dt = -m*N - a*N^2					# dN/dt
-		dv.dt = (2 * m + 4 * a * N) * V - m*N - 2 * a * N^2# dV/dt
+		dv.dt = -2 * (- m - 2 * a * N) * V + (- m*N - a * N^2) # dV/dt
 		res = c(dn.dt, dv.dt)
 		list(res)
 	})
@@ -153,6 +154,6 @@ points(out.model3$V ~ t, type='l', lty=4, col='red')
 plot(Nt4 ~ t, type='l', lty=2, col='blue')
 points(out.model4$N ~ t, type='l', lty=4, col='red')
 
-plot(Vt4 ~ t, type='l', lty=2, col='blue', 
-	ylim=c(min(c(Vt4,out.model4$V)), max(c(Vt4,out.model4$V))))
-points(out.model4$V ~ t, type='l', lty=4, col='red')
+#plot(Vt4 ~ t, type='l', lty=2, col='blue', 
+	#ylim=c(min(c(Vt4,out.model4$V)), max(c(Vt4,out.model4$V))))
+plot(out.model4$V ~ t, type='l', lty=4, col='red')
