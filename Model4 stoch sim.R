@@ -45,6 +45,7 @@ for(i in 1:nrow(fN)){
 
  plot(data.sim4[,'N'] ~ data.sim4[,'f'], ylab='Herbivores remaining', 
 	 xlab='Food index')
-
+ plot(data.sim4[,'N'] ~ data.sim4[,'N0'], ylab='Herbivores remaining', 
+	 xlab='N0')
 # plot(I(113 - data.sim[,'N']) ~ data.sim[,'f'], ylab='Herbivores drifting', 
 	# xlab='Food index')
