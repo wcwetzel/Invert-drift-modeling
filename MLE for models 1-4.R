@@ -82,30 +82,34 @@ model4.sim = function(t, x, parms) {
 E.SDt4 = function(N0, m, a, f, t, V0){
 	Vvec = vector()
 	sdvec = vector()
+	Nvec = vector()
 	for(i in 1:length(N0)){
 		N0i = N0[i]
-		start = c(N = N0i, V = V0)
-		parms = c(N0 = N0, V0 = V0, m = m, f=f, a=a)
-		out.model4 = as.data.frame(lsoda(start, times=c(0,t), model4.sim, parms))
-		#V = out.model4$V[2]
+		initial = c(N = N0i, V = V0)
+		parms = c(m = m, f=f, a=a)
+		out.model4 = as.data.frame(lsoda(initial, times=c(0,t), model4.sim, parms))
+		V = out.model4$V[length(out.model4$V)]
 		sd = sqrt(out.model4$V[length(out.model4$V)])
-		#Vvec[i] = V
+		Vvec[i] = V
 		sdvec[i] = sd
+		Nvec[i] = out.model4$N[length(out.model4$N)]
 	}
-	return(c(sdvec))
+	return(data.frame(f=f, N0=N0, N = Nvec, V = Vvec, sd = sdvec))
 }
-E.SDt4(113:120, 0.15, 0, 1, 10, 113/3)
+E.SDt4(113:200, 0.15, 0, 1, 10, 500/3)
 
-E.SDt4(data.sim[,'N0'], 0.15, 0, data.sim[,'f'], 10, 113/3)
+E.SDt4(data.sim[,'N0'][1:30], 0.15, 0, data.sim[,'f'][1:30], 10, 500/3)
 
-nll4 = function(N, m, a, f, N0, V0, t){
-	-sum( dnorm(x = N,
+nll4 = function(N, m, a, f, N0, V0, t, trace=TRUE){
+	nll = -sum( dnorm(x = N,
 		mean = E.Nt4(N0, m, a, f, t),
-		sd = E.SDt4(N0, m, a, f, t, V0),
+		sd = E.SDt4(N0, m, a, f, t, V0)$sd,
 		log = TRUE
 		))
+	if(trace) {cat('m:', m, 'V0:', V0, 'a:', a, 'nll:', nll, '\n')}
+	return(nll)
 }
-nll4(N=data.sim[,'N'], m=0.15, a=0, f=data.sim[,'f'], N0=data.sim[,'N0'], V0=113/3, t=10)
+nll4(N=data.sim[,'N'], m=0.15, a=0, f=data.sim[,'f'], N0=data.sim[,'N0'], V0=500/3, t=10, trace=TRUE)
 
 # choose a simulated dataset
 data.sim=data.sim4
@@ -130,11 +134,12 @@ model3 = mle2(minuslogl = nll3,
 	method='Nelder-Mead')
 
 model4 = mle2(minuslogl = nll4,
-	start = list(m=0.15, a = 0, V0 = 113/3),
+	start = list(m=0.15, V0 = 100, a = 0),
 	data = list(N0 = data.sim[,'N0'], t = 10,
-	f = data.sim[,'f'], N = data.sim[,'N']))
+	f = data.sim[,'f'], N = data.sim[,'N']),
+	method='SANN')#, lower=c(m=0.0001, V0=213/3, a=0))
 
-AICctab(model1, model2, model3, model4)
+AICctab(model1, model2, model3, model4, nobs=nrow(data.sim))
 
 
 
