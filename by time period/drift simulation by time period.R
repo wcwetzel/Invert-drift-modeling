@@ -1,7 +1,8 @@
 #### simulate binomial drift by 4 time periods ####
 # 12 Dec 2011
 
-n = 30 # sample size
+n = 6 # sample size
+foodlevels = 6 # number of food levels
 N0 = 113 # initial number at beginning of time period
 m = 0.1
 b = 0.01
@@ -17,7 +18,7 @@ pm5 = function(m, a, b, N) {m + a * N - b * data$food}
 pm6 = function(m, a, c, N) {(m + a * N) / (c + data$food)}
 
 # inital values and food:
-data = data.frame(N0 = 113, food = rep(1:6,4))
+data = data.frame(N0 = sort(rep(seq(113, 213, length=n), foodlevels)), food = rep(1:foodlevels,n))
 
 # simulate model 1:
 N = matrix(0, nrow=nrow(data), ncol=4) # vector of numbers drifting each t
