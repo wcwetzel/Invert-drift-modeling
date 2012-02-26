@@ -28,3 +28,5 @@ ldata = reshape(data, varying=list(c('t1','t2','t3','t4'),
 	c('N0t', 'N1', 'N2', 'N3'), c('N1', 'N2', 'N3', 'N4')),
 	v.names=c('drift', 'initial', 'stay'), timevar='time', 
 	direction='long', idvar='rep')
+
+# each row is the count from one time one channel was checked
