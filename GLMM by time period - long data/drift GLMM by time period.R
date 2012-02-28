@@ -34,104 +34,119 @@ ggplot( data=ldata, aes(y=ldata$drift, x=ldata$velocity)) +
 #### density ####
 dldata = ldata[ldata$experiment=='density',]
 
-m0 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2),
+d0 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2),
 	data=dldata, family='binomial')
 
-m1 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2)
+d1 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2)
 	+ initial, data=dldata, family='binomial')
 
-AIC(m0, m1)
-AICctab(m0,m1, nobs=28)
-anova(m0, m1)
+AIC(d0, d1)
+AICctab(d0, d1, weights=TRUE, nobs=28)
+anova(d0, d1)
+precis(d1)
 
+##################
+#### looking at time effect ####
+
+plot(drift/initial ~ time, data=dldata, xlim=c(0, 5))
+newt = seq(0,5, length=100)
+newtd = logistic(fixef(d0)[1] + fixef(d0)[2] * newt + fixef(d0)[3] * newt^2)
+points(newtd ~ newt, type='l')
+
+##################
 
 #### canopy + predation ####
 cpldata = ldata[ldata$experiment=='pred_canopy',]
 
-m0 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) + 
-	velocity, data=cpldata, family='binomial')
-
-m1 = lmer(cbind(drift, stay) ~ (1|rep) + preds + velocity + 
-	time + I(time^2), data=cpldata, family='binomial')
-
-m2 = lmer(cbind(drift, stay) ~ (1|rep) + canopy + 
-	velocity + time + I(time^2), data=cpldata, family='binomial')
-
-m3 = lmer(cbind(drift, stay) ~ (1|rep) + canopy + preds + 
-	velocity + time + I(time^2), data=cpldata, family='binomial')
-
-m4 = lmer(cbind(drift, stay) ~ (1|rep) + canopy + preds + 
-	velocity + time + I(time^2) + initial, data=cpldata, family='binomial')
-
-m4.5 = lmer(cbind(drift, stay) ~ (1|rep) + preds + 
-	velocity + time + I(time^2) + initial, data=cpldata, family='binomial')
-
-m4.7 = lmer(cbind(drift, stay) ~ (1|rep) + preds + 
-	time + I(time^2) + initial, data=cpldata, family='binomial')
-
-
-m5 = lmer(cbind(drift, stay) ~ (1|rep) + canopy + preds + 
-	velocity + time + I(time^2) + (1 + canopy|preds), 
+cp0 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2),
 	data=cpldata, family='binomial')
 
+cp1 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	preds, data=cpldata, family='binomial')
 
-AIC(m0, m1, m2, m3, m4, m5, m4.5, m4.7)
-AICctab(logLik(m0), logLik(m1), logLik(m2), logLik(m3), logLik(m4), logLik(m4.5),
-	logLik(m5), logLik(m4.7), weights=TRUE, nobs=nrow(cpldata)/4)
+cp2 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy, data=cpldata, family='binomial')
 
-anova(m0, m1, m3)
-anova(m2, m3)
-anova(m2, m0)
-anova(m1,m4)
+cp3 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + preds, data=cpldata, family='binomial')
+
+cp4 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + preds + canopy:preds, data=cpldata, family='binomial')
 
 
-# excess food
+
+cp0i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	initial, data=cpldata, family='binomial')
+
+cp1i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	preds + initial, data=cpldata, family='binomial')
+
+cp2i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + initial, data=cpldata, family='binomial')
+
+cp3i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + preds + initial, data=cpldata, family='binomial')
+
+cp4i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + preds + initial + canopy:preds, data=cpldata, family='binomial')
+
+# cp4 = lmer(cbind(drift, stay) ~ (1|rep) + canopy + preds + 
+	# velocity + time + I(time^2) + (1 + canopy|preds), 
+	# data=cpldata, family='binomial')
+
+AICctab(cp0, cp1, cp2, cp3, cp4, cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
+AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
+
+anova(cp1i, cp3i)
+anova(cp1i, cp0i)
+
+#############################
+
+#### excess food ####
+# no food, food linear, food curved
+# initial vs. no initial
+# food + initial vs. foodperinitial
+
 fldata = ldata[ldata$experiment=='excess_food',]
 
-m0 = lmer(cbind(drift, stay) ~ (1|rep) + time +
+f0 = lmer(cbind(drift, stay) ~ (1|rep) + time +
 	 I(time^2), data=fldata, family='binomial')
 
-m1 = lmer(cbind(drift, stay) ~ (1|rep) + food + 
-	time + I(time^2), data=fldata, family='binomial')
+f1 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	food, data=fldata, family='binomial')
 
-m2 = lmer(cbind(drift, stay) ~ (1|rep) + food + I(food^2) +
-	time + I(time^2), data=fldata, family='binomial')
+f2 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	food + I(food^2), data=fldata, family='binomial')
 
-m3 = lmer(cbind(drift, stay) ~ (1|rep) + food + I(food^2) +
-	time + I(time^2) + I(food^3), data=fldata, family='binomial')
+f0i = lmer(cbind(drift, stay) ~ (1|rep) + time +
+	 I(time^2) + initial, data=fldata, family='binomial')
 
-m4 = lmer(cbind(drift, stay) ~ (1|rep) + food + I(food^2) +
-	time + I(time^2) + velocity, data=fldata, family='binomial')
+f1i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	food + initial, data=fldata, family='binomial')
 
-m4.5 = lmer(cbind(drift, stay) ~ (1|rep) + I(food/initial)  +
-	time + I(time^2), data=fldata, family='binomial')
+f2i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	food + I(food^2) + initial, data=fldata, family='binomial')
 
-m4.7 = lmer(cbind(drift, stay) ~ (1|rep) + I(food/initial)  +
-	time + I(time^2) + initial, data=fldata, family='binomial')
+# f3 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	# foodperinitial, data=fldata, family='binomial')
 
-m4.8 = lmer(cbind(drift, stay) ~ (1|rep) + initial +
-	time + I(time^2), data=fldata, family='binomial')
-	
-m4.9 = lmer(cbind(drift, stay) ~ (1|rep) + initial + food + 
-	I(food^2) + time + I(time^2), data=fldata, family='binomial')
+# f4 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	# foodperinitial + I(foodperinitial^2), 
+	# data=fldata, family='binomial')
 
 
-m5 = lmer(cbind(drift, stay) ~ (1|rep) + I(food/N0) +
-	time + I(time^2), data=fldata, family='binomial')
+AICctab(f0, f1, f2, f0i, f1i, f2i, weights=TRUE, nobs=nrow(fldata)/4)
+AICctab(f0i, f1i, f2i, weights=TRUE, nobs=nrow(fldata)/4)
 
 
-AICctab(logLik(m0), logLik(m1), logLik(m2), logLik(m3), logLik(m4), logLik(m4.5),
-	logLik(m5), logLik(m4.7), logLik(m4.8), logLik(m4.9), 
-	weights=TRUE, nobs=nrow(fldata)/4)
-
-anova(m0, m1, m2, m3)
+anova(f2i, f1i)
 
 curve(logistic(-8.69862 + x * -1.05402 + x^2 * 0.1055), 0, 6)
 
-ranef(m2)
-dotplot(ranef(m2))
+ranef(f2i)
+dotplot(ranef(f2i))
 
-y = logistic(coef(m2)[[1]][1])
+y = logistic(coef(f2i)[[1]][1])
 x = 69:98
 plot(y[,1] ~ x)
-abline(logistic(fixef(m2)[1]), 0, col=2, lty=2)
+abline(logistic(fixef(f2i)[1]), 0, col=2, lty=2)
