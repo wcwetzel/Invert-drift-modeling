@@ -24,7 +24,7 @@ ggplot( data=ldata, aes(y=ldata$drift, x=ldata$time)) +
 
 
 #### do I include velocity or not? ####
-ggplot( data=ldata, aes(y=ldata$drift, x=ldata$velocity)) +
+ggplot( data=ldata[ldata$time==2,], aes(y=drift, x=velocity)) +
 	geom_point()+
 	stat_smooth()
 # NO, looks like no relationship. I think it makes sense
@@ -55,7 +55,7 @@ points(newtd ~ newt, type='l')
 
 ##################
 
-#### canopy + predation ####
+#### canopy + predation + Herbivore density ####
 cpldata = ldata[ldata$experiment=='pred_canopy',]
 
 cp0 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2),
@@ -75,6 +75,7 @@ cp4 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
 
 
 
+
 cp0i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
 	initial, data=cpldata, family='binomial')
 
@@ -90,13 +91,44 @@ cp3i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
 cp4i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
 	canopy + preds + initial + canopy:preds, data=cpldata, family='binomial')
 
-# cp4 = lmer(cbind(drift, stay) ~ (1|rep) + canopy + preds + 
-	# velocity + time + I(time^2) + (1 + canopy|preds), 
-	# data=cpldata, family='binomial')
+cp1id = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	preds + initial + Hdens, data=cpldata, family='binomial')
+
+cp1id.int = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	preds + initial + Hdens + Hdens:preds, data=cpldata, family='binomial')
+
+cp2id = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + initial + Hdens, data=cpldata, family='binomial')
+	
+cp2id.int = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + initial + Hdens, data=cpldata, family='binomial')
+
+cp3id = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + preds + initial + Hdens, data=cpldata, family='binomial')
+
+cp3id.int = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
+	canopy + preds + initial + Hdens + Hdens:preds,
+	 data=cpldata, family='binomial')
+
+
+plot(rate ~ Hdens, data=cpldata[cpldata$time==2,], pch=preds*2, col=preds+1)
+newHdens = 200:1600
+Hdens.nopred.pred = logistic(fixef(cp1id)[1] + fixef(cp1id)[2]*2 +fixef(cp1id)[3]*2^2 +
+	fixef(cp1id)[4] * 0 + fixef(cp1id)[5] * 212.075 + fixef(cp1id)[6] * newHdens)
+
+Hdens.pred.pred = logistic(fixef(cp1id)[1] + fixef(cp1id)[2]*2 +fixef(cp1id)[3]*2^2 +
+	fixef(cp1id)[4] * 1 + fixef(cp1id)[5] * 212.075 + fixef(cp1id)[6] * newHdens)
+
+lines(newHdens, Hdens.nopred.pred, col=1)
+lines(newHdens, Hdens.pred.pred, col=2)
+
 
 AICctab(cp0, cp1, cp2, cp3, cp4, cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
 AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
+AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, cp1id, cp1id.int, cp2id, cp2id.int,
+	cp3id, cp3id.int, weights=TRUE, nobs=40)
 
+anova(cp1id, cp1i)
 anova(cp1i, cp3i)
 anova(cp1i, cp0i)
 
