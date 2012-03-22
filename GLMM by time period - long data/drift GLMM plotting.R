@@ -96,11 +96,11 @@ mu.ci.cp = sapply(new.preds,
 
 # plot data, predictions, and CIs
 # run code for excess food first
-boxplot(1:4 ~ as.factor(1:4),
+boxplot(1:3 ~ as.factor(1:3),
 	data=cpldata[cpldata$time==2,], border='white',
 	las=1, xlab='', ylab='Proportion drifting',
-	names=c('No predators', 'Predators', 'Excess food', 'Natural food'),
-	ylim=c(0,0.6))
+	names=c('No pred', 'Pred', 'Excess food'),
+	ylim=c(0.019,0.5))
 pty = 20
 ps = 0.9
 points(new.preds+1, mu.cp, pch=pty, cex=ps)
@@ -109,7 +109,7 @@ arrows(1, mu.ci.cp[1,1], 1, mu.ci.cp[2,1], length=0.05,
 arrows(2, mu.ci.cp[1,2], 2, mu.ci.cp[2,2], length=0.05, 
 	angle=90, code=3)
 # add excess food points
-points(c(4,3), mu.f2i[new.food==6 | new.food==1], pch=pty, cex=ps)
+points(3, mu.f2i[new.food==6], pch=pty, cex=ps)
 arrows(3, mu.ci.f2i[1,new.food==6], 3, mu.ci.f2i[2,new.food==6],
 	length=0.05, angle=90, code=3)
 
