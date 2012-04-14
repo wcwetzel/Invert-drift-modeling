@@ -4,6 +4,7 @@
 # into the long format, in which each row is a spot check
 
 # use "drift GLMM by time period.R" instead of this one
+# this is old
 
 library(lme4)
 library(ggplot2)

@@ -19,8 +19,6 @@ data$N0t = data$N0
 data = data[,-c(2)]
 
 
-
-
 # using function reshape
 
 ldata = reshape(data, varying=list(c('t1','t2','t3','t4'),
