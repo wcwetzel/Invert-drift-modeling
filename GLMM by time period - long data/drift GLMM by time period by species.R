@@ -4,6 +4,7 @@
 # 1st run 'drift data reshape.R' to put the data
 # into the long format, in which each row is a spot check
 # 2nd run 'drift data reshape by species.R'
+# to do the same by species
 
 library(lme4)
 library(ggplot2)
@@ -37,7 +38,11 @@ d1 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2)
 AICctab(d0, d1, weights=TRUE, nobs=28)
 anova(d0, d1)
 precis(d1)
-
+logistic(precis(d1))
+post.d1 = sample.naive.posterior(d1)
+HPDI(post.d1)
+HPDI(logistic(post.d1))
+logistic(HPDI(post.d1))
 
 ### Hept (h) ###
 dlhdataspp = lhdataspp[lhdataspp$experiment=='density',]
