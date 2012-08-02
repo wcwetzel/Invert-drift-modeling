@@ -1,5 +1,7 @@
 ### plotting drift binomial GLMMs
-# 26 Feb 2012
+# 4 May 2012
+
+## PLOTTING FOR TIME PERIOD 3
 
 
 # 1st run 'drift data reshape.R'
@@ -12,55 +14,31 @@ library(bbmle)
 
 #### ploting density experiment ####
 post.d1 = sample.naive.posterior(d1) # sample posterior of d1
-# add random effect noise to posterior table
-post.d1$ran = rnorm(nrow(post.d1), mean=0, sd=0.43574)
 
 new.initial = seq(0, 606, by=0.5) # fake density values
 
-## Plot just for time period 2
-## first ignoring random effect
+## Plot just for time period 3
+## ignoring random effect
 # calcuate mu
 # calculate predicted value for ALL posterior sampled parms
 # for each and every fake density value using sapply
 # then take the mean across sampled parms for each fake density
 mu = sapply(new.initial, 
-	function(z) logistic(mean(post.d1[,1] + post.d1[,2] *2 + 
-	post.d1[,3] * 2^2 + post.d1[,4] * z)))
+	function(z) logistic(mean(post.d1[,1] + post.d1[,2] *3 + 
+	post.d1[,3] * 3^2 + post.d1[,4] * z)))
 
 # calculate ci by taking middle 95% of posterior
 mu.ci = sapply(new.initial, 
-	function(z) logistic(HPDI(post.d1[,1] + post.d1[,2] *2 + 
-	post.d1[,3] * 2^2 + post.d1[,4] * z)))
+	function(z) logistic(HPDI(post.d1[,1] + post.d1[,2] *3 + 
+	post.d1[,3] * 3^2 + post.d1[,4] * z)))
 
 # plot data, predictions, and CIs
-plot(drift/initial ~ initial, 
-	data=dldata[dldata$time==2,], pch=20,
+plot(drift/initial ~ initial, ylim=c(0,.3),
+	data=dldata[dldata$time==3,], pch=20,
 	las=1, xlab='Density', ylab='Proportion drifting')
 lines(new.initial, mu)
 lines(new.initial, mu.ci[1,], lty=2)
 lines(new.initial, mu.ci[2,], lty=2)
-
-
-## now with random effect
-mu.ran = sapply(new.initial, 
-	function(z) logistic(mean(post.d1[,1] + post.d1[,2] *2 + 
-	post.d1[,3] * 2^2 + post.d1[,4] * z + post.d1[,5])))
-
-# calculate ci by taking middle 95% of posterior
-mu.ci.ran = sapply(new.initial, 
-	function(z) logistic(HPDI(post.d1[,1] + post.d1[,2] *2 + 
-	post.d1[,3] * 2^2 + post.d1[,4] * z + post.d1[,5])))
-
-# plot data, predictions, and CIs
-plot(drift/initial ~ initial, 
-	data=dldata[dldata$time==2,], pch=20,
-	las=1, xlab='Density', ylab='Proportion drifting')
-lines(new.initial, mu.ran)
-lines(new.initial, mu.ci.ran[1,], lty=2)
-lines(new.initial, mu.ci.ran[2,], lty=2)
-# I don't think we should do it with the random effect because
-# we are really just interested in what happens within a channel
-# how the density affects things in a channel
 
 
 
@@ -75,7 +53,9 @@ lines(new.initial, mu.ci.ran[2,], lty=2)
 # so tiny as to be ecologically unimportant.
 
 # I'm going to do this for the mean initial for time
-# period 2 (212.075) at time period 2
+# period 3 (152.5) at time period 2
+
+by(cpldata$initial, cpldata$time, mean)
 
 post.cp1i = sample.naive.posterior(cp1i)
 
@@ -85,14 +65,14 @@ new.preds = 0:1
 # calculate mean for preds
 mu.cp = sapply(new.preds, 
 	function(z) logistic(mean(post.cp1i[,1] + post.cp1i[,2] * 
-	2 +	post.cp1i[,3] * 2^2 + post.cp1i[,4] * z +
-	post.cp1i[,5] * 212.075)))
+	3 +	post.cp1i[,3] * 3^2 + post.cp1i[,4] * z +
+	post.cp1i[,5] * 152.5)))
 
 # calculate ci by taking middle 95% of posterior
 mu.ci.cp = sapply(new.preds, 
 	function(z) logistic(HPDI(post.cp1i[,1] + post.cp1i[,2] * 
-	2 +	post.cp1i[,3] * 2^2 + post.cp1i[,4] * z +
-	post.cp1i[,5] * 212.075)))
+	3 +	post.cp1i[,3] * 3^2 + post.cp1i[,4] * z +
+	post.cp1i[,5] * 152.5)))
 
 # plot data, predictions, and CIs
 # run code for excess food first
@@ -112,8 +92,6 @@ arrows(2, mu.ci.cp[1,2], 2, mu.ci.cp[2,2], length=0.05,
 points(3, mu.f2i[new.food==6], pch=pty, cex=ps)
 arrows(3, mu.ci.f2i[1,new.food==6], 3, mu.ci.f2i[2,new.food==6],
 	length=0.05, angle=90, code=3)
-# add line to separate excess food from predation
-abline(v=2.5, lty=2, col='grey')
 
 
 ### with Hdens ###
@@ -159,9 +137,12 @@ lines(newHdens, Hdens.ci.pred[2,], lty=2, col=2)
 ##################################################
 
 #### plotting excess food ####
-#### figure 1 in the MS ###
+
+by(fldata$initial, fldata$time, mean)
+
+
 # I'm going to do this for the mean initial for time
-# period 2 (211.8333) at time period 2
+# period 3 (196.37) at time period 2
 
 post.f2i = sample.naive.posterior(f2i) # sample posterior of d1
 # is the posterior approximately MVN?
@@ -176,23 +157,23 @@ new.food = seq(1, 6, by=0.01) # fake density values
 
 # calcuate mu
 mu.f2i = sapply(new.food, 
-	function(z) logistic(mean(post.f2i[,1] + post.f2i[,2] * 2 + 
-	post.f2i[,3] * 2^2 + post.f2i[,4] * z + 
-	post.f2i[,5] * z^2 + post.f2i[,6] * 211.8333)))
+	function(z) logistic(mean(post.f2i[,1] + post.f2i[,2] * 3 + 
+	post.f2i[,3] * 3^2 + post.f2i[,4] * z + 
+	post.f2i[,5] * z^2 + post.f2i[,6] * 196.37)))
 
 # calculate ci by taking middle 95% of posterior
 mu.ci.f2i = sapply(new.food, 
-	function(z) logistic(HPDI(post.f2i[,1] + post.f2i[,2] * 2 + 
-	post.f2i[,3] * 2^2 + post.f2i[,4] * z + 
-	post.f2i[,5] * z^2 + post.f2i[,6] * 211.8333)))
+	function(z) logistic(HPDI(post.f2i[,1] + post.f2i[,2] * 3 + 
+	post.f2i[,3] * 3^2 + post.f2i[,4] * z + 
+	post.f2i[,5] * z^2 + post.f2i[,6] * 196.37)))
 
 # plot data, predictions, and CIs
 quartz(width=1.2*3.5, height=1*3.5)
 par(mar=c(5,4,4,5)+0.1)
 plot(drift/initial ~ I(food-1), 
-	data=fldata[fldata$time==2,], pch=20,
+	data=fldata[fldata$time==3,], pch=20,
 	las=1, xlab='Substrate isolation (days)', 
-	ylab='Proportion drifting')
+	ylab='Proportion drifting', ylim=c(0, .2))
 lines(new.food-1, mu.f2i)
 lines(new.food-1, mu.ci.f2i[1,], lty=2)
 lines(new.food-1, mu.ci.f2i[2,], lty=2)
@@ -201,7 +182,7 @@ par(new=TRUE)
 plot(afdm ~ I(food-1), data=fldata[fldata$time==2,],
 	col='white', xaxt='n', yaxt='n', xlab='', ylab='')
 axis(4, las=1)
-mtext(expression(paste('Periphyton AFDM (g/m'^{2},')')), side=4, line=3)
+mtext(expression(paste('Remaining biofilm (g m'^{-2},')')), side=4, line=3)
 mafdm = lm(afdm ~ food, data=data[data$experiment=='excess_food',])
 mafdm0 = lm(afdm ~ 1, data=data[data$experiment=='excess_food',])
 mafdm2 = mle2(afdm ~ dnorm(mean = a + b * food, sd=s), start=list(a=1, b=0, s=2), 
@@ -209,7 +190,7 @@ mafdm2 = mle2(afdm ~ dnorm(mean = a + b * food, sd=s), start=list(a=1, b=0, s=2)
 AICtab(mafdm, mafdm0)
 anova(mafdm, mafdm0)
 pmafdm = profile(mafdm2)
-#plot(pmafdm)
+plot(pmafdm)
 post.mafdm = sample.naive.posterior(mafdm)
 
 # calcuate mu
@@ -220,12 +201,12 @@ mu.afdm = sapply(new.food,
 ci.afdm = sapply(new.food, 
 	function(z) HPDI(post.mafdm[,1] + post.mafdm[,2] * z))
 
-lines(new.food-1, mu.afdm, col=grey(0.35))
-lines(new.food-1, ci.afdm[1,], lty=2, col=grey(0.35))
-lines(new.food-1, ci.afdm[2,], lty=2, col=grey(0.35))
+lines(new.food-1, mu.afdm, col='grey')
+lines(new.food-1, ci.afdm[1,], lty=2, col='grey')
+lines(new.food-1, ci.afdm[2,], lty=2, col='grey')
 
 
-## plotting combined excess food plus predators
+# plotting combined excess food plus predators
 # first with preds on right
 par(fig=c(0, 0.6, 0, 1))
 plot(drift/initial ~ I(food-1), 

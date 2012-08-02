@@ -3,6 +3,8 @@
 # (spot check = counts from one time period)
 # 8 Feb 2012
 
+# this is the first script to run.
+# it preps the data for "drift GLMM by time period.R"
 
 data = read.csv(
 "/Users/will/Documents/Analysis for colleagues/bruce/Drift data/drift experiments with time.csv")

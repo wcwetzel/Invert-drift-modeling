@@ -3,10 +3,14 @@
 # 1st run 'drift data reshape.R' to put the data
 # into the long format, in which each row is a spot check
 
+# 2nd run this file ('drift GLMM by time period.R')
+# 3rd run 'drift GLMM plotting.R' to plot figs
+
 library(lme4)
 library(ggplot2)
 library(rethinking)
 library(bbmle)
+library(arm)
 
 # logistic transform:
 logistic = function(x){1 / (1 + exp(-x))}
@@ -42,8 +46,23 @@ d1 = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2)
 
 AIC(d0, d1)
 AICctab(d0, d1, weights=TRUE, nobs=28)
+AICtab(d0, d1, weights=TRUE)
+AICctab(d0, d1, weights=TRUE, nobs=14)
+AICctab(d0, d1, weights=TRUE, nobs=100000)
+AICctab(d0, d1, weights=TRUE, nobs=38*(1/3))
+
+# check that AIC results are similar to DIC
+extractDIC(d0)
+extractDIC(d1)
+extractDIC(d0) - extractDIC(d1) 
+
 anova(d0, d1)
 precis(d1)
+precis(d0)
+post.d1 = sample.naive.posterior(d1)
+apply(post.d1,2,mean)
+
+apply(logistic(post.d1),2,mean)
 
 ##################
 #### looking at time effect ####
@@ -124,13 +143,36 @@ lines(newHdens, Hdens.pred.pred, col=2)
 
 
 AICctab(cp0, cp1, cp2, cp3, cp4, cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
-AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
 AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, cp1id, cp1id.int, cp2id, cp2id.int,
 	cp3id, cp3id.int, weights=TRUE, nobs=40)
+
+AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40)
+AICtab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE)
+AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=20)
+AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=40*(1/3))
+AICctab(cp0i, cp1i, cp2i, cp3i, cp4i, weights=TRUE, nobs=10000)
+
+extractDIC(cp0i) 
+extractDIC(cp1i)
+extractDIC(cp2i)
+extractDIC(cp3i)
+extractDIC(cp4i)
+
+extractDIC(cp1i) - extractDIC(cp1i)
+extractDIC(cp3i) - extractDIC(cp1i)
+extractDIC(cp4i) - extractDIC(cp1i)
+extractDIC(cp0i) - extractDIC(cp1i)
+extractDIC(cp2i) - extractDIC(cp1i)
+
+
 
 anova(cp1id, cp1i)
 anova(cp1i, cp3i)
 anova(cp1i, cp0i)
+
+post.cp1i = sample.naive.posterior(cp1i)
+HPDI(post.cp1i[,1])
+
 
 #############################
 
@@ -167,9 +209,31 @@ f2i = lmer(cbind(drift, stay) ~ (1|rep) + time + I(time^2) +
 	# data=fldata, family='binomial')
 
 
-AICctab(f0, f1, f2, f0i, f1i, f2i, weights=TRUE, nobs=nrow(fldata)/4)
-AICctab(f0i, f1i, f2i, weights=TRUE, nobs=nrow(fldata)/4)
+AICctab(f0, f1, f2, f0i, f1i, f2i, weights=TRUE, nobs=30)
 
+AICctab(f0i, f1i, f2i, weights=TRUE, nobs=30)
+AICtab(f0i, f1i, f2i, weights=TRUE)
+AICctab(f0i, f1i, f2i, weights=TRUE, nobs=15)
+AICctab(f0i, f1i, f2i, weights=TRUE, nobs=10)
+AICctab(f0i, f1i, f2i, weights=TRUE, nobs=1000000)
+
+extractDIC(f0i)
+extractDIC(f1i)
+extractDIC(f2i)
+
+extractDIC(f2i) - extractDIC(f2i)
+extractDIC(f1i) - extractDIC(f2i)
+extractDIC(f0i) - extractDIC(f2i)
+
+
+
+
+
+
+
+precis(f2i)
+precis(f1i)
+precis(f0i)
 
 anova(f2i, f1i)
 
